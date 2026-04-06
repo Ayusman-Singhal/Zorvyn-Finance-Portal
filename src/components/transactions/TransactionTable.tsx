@@ -1,15 +1,24 @@
 import React from 'react';
-import { useFilters } from '../../hooks/useFilters';
-import { useAuth } from '../../hooks/useAuth';
-import { formatCurrency, formatDate } from '../../utils/formatters';
-import { Badge } from '../common/Badge';
-import { Button } from '../common/Button';
+import { useFilters } from '@/hooks/useFilters';
+import { useAuth } from '@/hooks/useAuth';
+import { formatCurrency, formatDate } from '@/utils/formatters';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { EmptyState } from '../common/EmptyState';
-import type { Transaction } from '../../types';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { ArrowUp, ArrowDown, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
+import type { Transaction } from '@/types';
 
 interface TransactionTableProps {
-  onEdit: (transaction: Transaction) => void;
-  onDelete: (id: string) => void;
+  onEdit?: (transaction: Transaction) => void;
+  onDelete?: (id: string) => void;
 }
 
 export const TransactionTable: React.FC<TransactionTableProps> = ({
@@ -17,7 +26,10 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
   onDelete,
 }) => {
   const { filteredTransactions, sortConfig, setSortConfig } = useFilters();
-  const { canEdit, canDelete } = useAuth();
+  const { currentRole } = useAuth();
+  
+  const canEdit = currentRole === 'admin' && onEdit;
+  const canDelete = currentRole === 'admin' && onDelete;
 
   const handleSort = (key: keyof Transaction) => {
     const direction =
@@ -27,20 +39,12 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
 
   const getSortIcon = (key: keyof Transaction) => {
     if (sortConfig.key !== key) {
-      return (
-        <svg style={{ width: 16, height: 16 }} className="text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-        </svg>
-      );
+      return <ArrowUpDown size={14} className="text-muted-foreground ml-1" />;
     }
     return sortConfig.direction === 'asc' ? (
-      <svg style={{ width: 16, height: 16 }} className="text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-      </svg>
+      <ArrowUp size={14} className="text-primary ml-1" />
     ) : (
-      <svg style={{ width: 16, height: 16 }} className="text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-      </svg>
+      <ArrowDown size={14} className="text-primary ml-1" />
     );
   };
 
@@ -48,128 +52,115 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
     return (
       <EmptyState
         title="No transactions found"
-        description="Try adjusting your filters or add a new transaction."
+        description="Try adjusting your filters or add a new transaction if you have permissions."
       />
     );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-fade-in">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th
-                scope="col"
-                onClick={() => handleSort('date')}
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+    <div className="rounded-md border border-border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => handleSort('date')}
+            >
+              <div className="flex items-center">
+                Date {getSortIcon('date')}
+              </div>
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => handleSort('description')}
+            >
+              <div className="flex items-center">
+                Description {getSortIcon('description')}
+              </div>
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => handleSort('category')}
+            >
+              <div className="flex items-center">
+                Category {getSortIcon('category')}
+              </div>
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => handleSort('type')}
+            >
+              <div className="flex items-center">
+                Type {getSortIcon('type')}
+              </div>
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50 transition-colors text-right"
+              onClick={() => handleSort('amount')}
+            >
+              <div className="flex items-center justify-end">
+                Amount {getSortIcon('amount')}
+              </div>
+            </TableHead>
+            {(canEdit || canDelete) && (
+              <TableHead className="text-right">Actions</TableHead>
+            )}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredTransactions.map((transaction) => (
+            <TableRow key={transaction.id}>
+              <TableCell className="font-medium whitespace-nowrap">
+                {formatDate(transaction.date)}
+              </TableCell>
+              <TableCell>{transaction.description}</TableCell>
+              <TableCell className="text-muted-foreground whitespace-nowrap">
+                {transaction.category}
+              </TableCell>
+              <TableCell>
+                <Badge variant={transaction.type === 'income' ? 'default' : 'secondary'}>
+                  {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
+                </Badge>
+              </TableCell>
+              <TableCell 
+                className={`text-right font-medium whitespace-nowrap ${
+                  transaction.type === 'income' ? 'text-primary' : 'text-foreground'
+                }`}
               >
-                <div className="flex items-center gap-1">
-                  Date
-                  {getSortIcon('date')}
-                </div>
-              </th>
-              <th
-                scope="col"
-                onClick={() => handleSort('description')}
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-              >
-                <div className="flex items-center gap-1">
-                  Description
-                  {getSortIcon('description')}
-                </div>
-              </th>
-              <th
-                scope="col"
-                onClick={() => handleSort('category')}
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-              >
-                <div className="flex items-center gap-1">
-                  Category
-                  {getSortIcon('category')}
-                </div>
-              </th>
-              <th
-                scope="col"
-                onClick={() => handleSort('type')}
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-              >
-                <div className="flex items-center gap-1">
-                  Type
-                  {getSortIcon('type')}
-                </div>
-              </th>
-              <th
-                scope="col"
-                onClick={() => handleSort('amount')}
-                className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-              >
-                <div className="flex items-center justify-end gap-1">
-                  Amount
-                  {getSortIcon('amount')}
-                </div>
-              </th>
+                {transaction.type === 'income' ? '+' : '-'}
+                {formatCurrency(transaction.amount)}
+              </TableCell>
               {(canEdit || canDelete) && (
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <TableCell className="text-right whitespace-nowrap">
+                  <div className="flex justify-end gap-2">
+                    {canEdit && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(transaction)}
+                        title="Edit"
+                      >
+                        <Pencil size={16} />
+                      </Button>
+                    )}
+                    {canDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => onDelete(transaction.id)}
+                        title="Delete"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
               )}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredTransactions.map((transaction) => (
-              <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {formatDate(transaction.date)}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {transaction.description}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {transaction.category}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <Badge type={transaction.type}>
-                    {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
-                  </Badge>
-                </td>
-                <td
-                  className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-right ${
-                    transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                  }`}
-                >
-                  {transaction.type === 'income' ? '+' : '-'}
-                  {formatCurrency(transaction.amount)}
-                </td>
-                {(canEdit || canDelete) && (
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end gap-2">
-                      {canEdit && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEdit(transaction)}
-                        >
-                          Edit
-                        </Button>
-                      )}
-                      {canDelete && (
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => onDelete(transaction.id)}
-                        >
-                          Delete
-                        </Button>
-                      )}
-                    </div>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 };

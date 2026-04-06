@@ -1,8 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { useTransactions } from '../../hooks/useTransactions';
-import { Button } from '../common/Button';
+import React, { useState } from 'react';
+import { useTransactions } from '@/hooks/useTransactions';
+import { Button } from '@/components/ui/button';
 import { TransactionForm } from './TransactionForm';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -22,16 +27,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     type: 'expense' as 'income' | 'expense',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isVisible, setIsVisible] = useState(false);
-  const backdropRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      requestAnimationFrame(() => setIsVisible(true));
-    } else {
-      setIsVisible(false);
-    }
-  }, [isOpen]);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -81,46 +76,40 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       });
     }
   };
+  
+  const handleFieldChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
 
   const handleTypeChange = (type: 'income' | 'expense') => {
     setFormData((prev) => ({ ...prev, type, category: '' }));
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === backdropRef.current) {
-      onClose();
-    }
-  };
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Add Transaction</DialogTitle>
+        </DialogHeader>
 
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div
-      ref={backdropRef}
-      onClick={handleBackdropClick}
-      className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50 transition-opacity duration-200 ${
-        isVisible ? 'opacity-100' : 'opacity-0'
-      }`}
-    >
-      <div
-        className={`bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-200 ${
-          isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-        }`}
-      >
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Add Transaction</h2>
-        </div>
-
-        <form onSubmit={handleSubmit} className="px-6 py-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <TransactionForm
             formData={formData}
             errors={errors}
             onChange={handleChange}
             onTypeChange={handleTypeChange}
+            onFieldChange={handleFieldChange}
           />
 
           <div className="flex justify-end gap-3 pt-6">
-            <Button type="button" variant="secondary" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
             <Button type="submit">
@@ -128,8 +117,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             </Button>
           </div>
         </form>
-      </div>
-    </div>,
-    document.body
+      </DialogContent>
+    </Dialog>
   );
 };

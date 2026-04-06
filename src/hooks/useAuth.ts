@@ -1,5 +1,5 @@
 import { useAuthStore } from '../store/authStore';
-import type { Role } from '../types';
+
 
 export const useAuth = () => {
   const { currentRole, setRole, hasPermission } = useAuthStore();

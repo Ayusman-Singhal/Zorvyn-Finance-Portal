@@ -1,7 +1,16 @@
 import React from 'react';
-import { useFilters } from '../../hooks/useFilters';
-import { ALL_CATEGORIES } from '../../utils/mockData';
-import { Button } from '../common/Button';
+import { useFilters } from '@/hooks/useFilters';
+import { ALL_CATEGORIES } from '@/utils/mockData';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export const TransactionFilters: React.FC = () => {
   const {
@@ -20,59 +29,66 @@ export const TransactionFilters: React.FC = () => {
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
-      <div className="flex flex-col lg:flex-row gap-4">
+    <div className="bg-card p-5 rounded-lg border border-border">
+      <div className="flex flex-col lg:flex-row gap-4 mb-4">
         {/* Search */}
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
-          <input
-            type="text"
+        <div className="flex-1 space-y-2">
+          <Label htmlFor="search">Search</Label>
+          <Input
+            id="search"
             value={filters.searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search transactions..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full"
           />
         </div>
 
         {/* Type Filter */}
-        <div className="w-full lg:w-48">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-          <select
-            value={filters.typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value as 'all' | 'income' | 'expense')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <div className="w-full lg:w-[200px] space-y-2">
+          <Label htmlFor="type-filter">Type</Label>
+          <Select 
+            value={filters.typeFilter} 
+            onValueChange={(value) => setTypeFilter(value as 'all' | 'income' | 'expense')}
           >
-            <option value="all">All Types</option>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
+            <SelectTrigger id="type-filter">
+              <SelectValue placeholder="All types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="income">Income</SelectItem>
+              <SelectItem value="expense">Expense</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Reset Button */}
         <div className="flex items-end">
-          <Button variant="secondary" onClick={resetFilters}>
+          <Button variant="outline" onClick={resetFilters} className="w-full lg:w-auto">
             Reset Filters
           </Button>
         </div>
       </div>
 
       {/* Category Filter */}
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Categories</label>
+      <div>
+        <Label className="mb-3 block">Categories</Label>
         <div className="flex flex-wrap gap-2">
-          {ALL_CATEGORIES.map((category) => (
-            <button
-              key={category}
-              onClick={() => handleCategoryToggle(category)}
-              className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                filters.categoryFilter.includes(category)
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
+          {ALL_CATEGORIES.map((category) => {
+            const isSelected = filters.categoryFilter.includes(category);
+            return (
+              <button
+                key={category}
+                onClick={() => handleCategoryToggle(category)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+                  isSelected
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
+                }`}
+              >
+                {category}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

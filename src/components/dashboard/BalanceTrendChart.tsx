@@ -12,9 +12,10 @@ import {
   type ChartOptions,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { Card } from '../common/Card';
-import { useTransactions } from '../../hooks/useTransactions';
-import { getBalanceTrendData } from '../../utils/chartDataHelpers';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTransactions } from '@/hooks/useTransactions';
+import { getBalanceTrendData } from '@/utils/chartDataHelpers';
+import { TrendingUp } from 'lucide-react';
 
 ChartJS.register(
   CategoryScale,
@@ -43,14 +44,20 @@ export const BalanceTrendChart: React.FC = () => {
         display: false,
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleFont: { size: 13, family: 'Inter' },
-        bodyFont: { size: 12, family: 'Inter' },
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        titleColor: '#1f2937',
+        bodyColor: '#4b5563',
+        borderColor: '#e5e7eb',
+        borderWidth: 1,
+        titleFont: { size: 13, family: 'Atkinson Hyperlegible, sans-serif' },
+        bodyFont: { size: 12, family: 'Atkinson Hyperlegible, sans-serif' },
         padding: 12,
         cornerRadius: 8,
+        displayColors: false,
         callbacks: {
           label: (context) => {
-            return `Balance: $${context.parsed.y.toLocaleString()}`;
+            const val = context.parsed.y ?? 0;
+            return `Balance: $${val.toLocaleString()}`;
           },
         },
       },
@@ -62,7 +69,7 @@ export const BalanceTrendChart: React.FC = () => {
           color: 'rgba(0,0,0,0.05)',
         },
         ticks: {
-          font: { family: 'Inter', size: 11 },
+          font: { family: 'Atkinson Hyperlegible, sans-serif', size: 11 },
           callback: (value) => `$${Number(value).toLocaleString()}`,
         },
       },
@@ -71,7 +78,7 @@ export const BalanceTrendChart: React.FC = () => {
           display: false,
         },
         ticks: {
-          font: { family: 'Inter', size: 11 },
+          font: { family: 'Atkinson Hyperlegible, sans-serif', size: 11 },
           maxTicksLimit: 10,
         },
       },
@@ -79,10 +86,18 @@ export const BalanceTrendChart: React.FC = () => {
   };
 
   return (
-    <Card title="Balance Trend (Last 30 Days)">
-      <div className="h-64">
-        <Line data={data} options={options} />
-      </div>
+    <Card className="h-full flex flex-col border-border shadow-sm">
+      <CardHeader className="border-b border-border/50 pb-4">
+        <CardTitle className="text-lg font-bold flex items-center gap-2">
+          <TrendingUp size={20} className="text-primary" />
+          Balance Trend (Last 30 Days)
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex-1 p-6 relative">
+        <div className="h-[300px]">
+          <Line data={data} options={options} />
+        </div>
+      </CardContent>
     </Card>
   );
 };

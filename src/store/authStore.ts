@@ -17,13 +17,8 @@ export const useAuthStore = create<AuthState>()(
         set({ currentRole: role });
       },
 
-      hasPermission: (action) => {
-        const { currentRole } = get();
-        if (currentRole === 'admin') return true;
-        if (currentRole === 'viewer') {
-          return false;
-        }
-        return false;
+      hasPermission: (_action) => {
+        return get().currentRole === 'admin';
       },
     }),
     {

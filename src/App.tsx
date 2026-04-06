@@ -1,20 +1,25 @@
-import { useEffect } from 'react';
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
-import { Dashboard } from './components/Dashboard';
-import { useTransactions } from './hooks/useTransactions';
+import { DashboardPage } from './pages/DashboardPage';
+import { TransactionsPage } from './pages/TransactionsPage';
+import { InsightsPage } from './pages/InsightsPage';
+import { AdminPage } from './pages/AdminPage';
 
-function App() {
-  const { initializeMockData } = useTransactions();
-
-  useEffect(() => {
-    initializeMockData();
-  }, [initializeMockData]);
-
+const App: React.FC = () => {
   return (
-    <Layout>
-      <Dashboard />
-    </Layout>
+    <BrowserRouter>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/transactions" element={<TransactionsPage />} />
+          <Route path="/insights" element={<InsightsPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+        </Routes>
+      </Layout>
+      {/* <Toaster /> will be added when we migrate toasts */}
+    </BrowserRouter>
   );
-}
+};
 
 export default App;

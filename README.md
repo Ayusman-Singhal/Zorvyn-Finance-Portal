@@ -15,7 +15,7 @@ A clean, intuitive, and interactive Finance Dashboard built with React, TypeScri
 - Filter by type (Income/Expense) and categories
 - Sort by date, description, category, type, or amount
 - Add, edit, and delete transactions (role-based)
-- **Export functionality** — download transactions as CSV or JSON
+- **Export functionality** download transactions as CSV or JSON
 
 ### Role-Based UI
 - **Viewer**: Can only view data (no edit capabilities)
@@ -31,15 +31,15 @@ A clean, intuitive, and interactive Finance Dashboard built with React, TypeScri
 ### Additional Features
 - 🌙 **Dark mode** with smooth transitions (persisted via localStorage)
 - 💾 **Data persistence** via localStorage for transactions, auth, and theme
-- ✨ **Smooth animations** — fade-in, slide-up, and scale effects on cards, charts, and modals
-- 📤 **Export** — download transaction data as CSV or JSON
+- ✨ **Smooth animations** fade-in, slide-up, and scale effects on cards, charts, and modals
+- 📤 **Export** download transaction data as CSV or JSON
 
 ### State Management
 - Zustand for global state management with four stores:
-  - `transactionStore` — CRUD operations with localStorage persistence
-  - `authStore` — role-based access control
-  - `filterStore` — search, category, type, and sort state
-  - `themeStore` — dark/light mode with persistence
+  - `transactionStore` CRUD operations with localStorage persistence
+  - `authStore` role-based access control
+  - `filterStore` search, category, type, and sort state
+  - `themeStore` dark/light mode with persistence
 - Real-time updates across components
 
 ## Tech Stack
@@ -54,7 +54,7 @@ A clean, intuitive, and interactive Finance Dashboard built with React, TypeScri
 ## Design Decisions
 
 ### Why Zustand over Context API?
-Zustand provides a simpler, boilerplate-free API compared to React Context + useReducer. It also offers built-in middleware for localStorage persistence (`persist`), which was crucial for keeping user data across sessions. The store pattern scales well — each domain (transactions, auth, filters, theme) gets its own independent store without provider nesting.
+Zustand provides a simpler, boilerplate-free API compared to React Context + useReducer. It also offers built-in middleware for localStorage persistence (`persist`), which was crucial for keeping user data across sessions. The store pattern scales well each domain (transactions, auth, filters, theme) gets its own independent store without provider nesting.
 
 ### Why Chart.js over Recharts?
 Chart.js offers a smaller bundle size and more granular control over tooltips, animations, and interactions. The `react-chartjs-2` wrapper provides clean React integration while maintaining access to Chart.js's full configuration API.
